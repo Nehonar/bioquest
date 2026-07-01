@@ -1,9 +1,9 @@
 package com.bioquest.widget
 
 import android.content.Context
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
@@ -17,6 +17,7 @@ import androidx.glance.appwidget.provideContent
 import androidx.glance.appwidget.updateAll
 import androidx.glance.background
 import androidx.glance.layout.Alignment
+import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
@@ -28,6 +29,8 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
+import androidx.compose.runtime.Composable
+import androidx.glance.layout.defaultWeight
 import com.bioquest.BioQuestApplication
 import com.bioquest.domain.model.HabitType
 import com.bioquest.domain.model.WidgetState
@@ -38,10 +41,20 @@ private val Red = Color(0xFFFF3B30)
 private val Bg = Color(0xFF05090A)
 private val Muted = Color(0xFF5C8A66)
 
+// Button background tints (dark, so the coloured label reads as a "chip").
+private val PositiveBg = Color(0xFF0E2A16)
+private val NeutralBg = Color(0xFF2A2410)
+private val RiskBg = Color(0xFF2A1010)
+
 /**
  * Bio Core 4x2 widget: the product's centrepiece. Renders four stats +
- * corruption and the next quest, and exposes one-tap logging for Water, Fruit,
- * Treat and Mood via Glance [actionRunCallback].
+ * corruption and two rows of one-tap food logging (Water / Fruit / Healthy and
+ * Normal / Processed / Pastry) via Glance [actionRunCallback].
+ *
+ * A Glance Column does not scroll, so anything below the widget's height is
+ * simply clipped. The layout is kept deliberately compact — no standalone quest
+ * or warning line (a "!" folds into the header) — so the action buttons always
+ * stay on screen and tappable.
  */
 class BioCoreWidget : GlanceAppWidget() {
 
@@ -70,7 +83,7 @@ class BioCoreWidgetReceiver : GlanceAppWidgetReceiver() {
 @Composable
 private fun BioCoreContent(state: WidgetState) {
     Column(
-        modifier = GlanceModifier.fillMaxWidth().background(Bg).padding(10.dp),
+        modifier = GlanceModifier.fillMaxWidth().background(Bg).padding(8.dp),
     ) {
         Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text("BIO CORE", style = TextStyle(color = ColorProvider(Green), fontWeight = FontWeight.Bold))
@@ -79,8 +92,12 @@ private fun BioCoreContent(state: WidgetState) {
                 "// ${state.statusLabel}",
                 style = TextStyle(color = ColorProvider(if (state.corruption >= 60) Red else Muted)),
             )
+            if (state.warning != null) {
+                Spacer(GlanceModifier.width(6.dp))
+                Text(" ! ", style = TextStyle(color = ColorProvider(Red), fontWeight = FontWeight.Bold))
+            }
         }
-        Spacer(GlanceModifier.height(4.dp))
+        Spacer(GlanceModifier.height(3.dp))
 
         WidgetStatRow("VITALITY", state.vitality)
         WidgetStatRow("RECOVERY", state.recovery)
@@ -89,23 +106,19 @@ private fun BioCoreContent(state: WidgetState) {
         WidgetStatRow("CORRUPTION", state.corruption, invert = true)
 
         Spacer(GlanceModifier.height(4.dp))
-        Text(
-            "QUEST: ${state.nextQuestTitle} ${state.nextQuestDetail}",
-            style = TextStyle(color = ColorProvider(Amber)),
-        )
-        if (state.warning != null) {
-            Text("WARNING: ${state.warning}", style = TextStyle(color = ColorProvider(Red)))
-        }
 
-        Spacer(GlanceModifier.height(6.dp))
+        // Row 1 — positive actions (green).
         Row(modifier = GlanceModifier.fillMaxWidth()) {
-            WidgetActionButton("AGUA", HabitType.WATER, 250.0)
-            Spacer(GlanceModifier.width(4.dp))
-            WidgetActionButton("FRUTA", HabitType.FRUIT, 1.0)
-            Spacer(GlanceModifier.width(4.dp))
-            WidgetActionButton("CAPRICHO", HabitType.RISK_FOOD, 1.0, ruleId = "ice_cream")
-            Spacer(GlanceModifier.width(4.dp))
-            WidgetActionButton("MOOD", HabitType.MOOD, 3.0, mood = 3)
+            WidgetActionButton("AGUA", HabitType.WATER, 250.0, PositiveBg, Green)
+            WidgetActionButton("FRUTA", HabitType.FRUIT, 1.0, PositiveBg, Green)
+            WidgetActionButton("SANO", HabitType.HEALTHY_MEAL, 1.0, PositiveBg, Green)
+        }
+        Spacer(GlanceModifier.height(3.dp))
+        // Row 2 — neutral + risk foods (amber / red).
+        Row(modifier = GlanceModifier.fillMaxWidth()) {
+            WidgetActionButton("NORMAL", HabitType.NORMAL_MEAL, 1.0, NeutralBg, Amber)
+            WidgetActionButton("PROCES", HabitType.RISK_FOOD, 1.0, RiskBg, Red, ruleId = "fast_food")
+            WidgetActionButton("BOLLE", HabitType.RISK_FOOD, 1.0, RiskBg, Red, ruleId = "pastry")
         }
     }
 }
@@ -122,33 +135,53 @@ private fun WidgetStatRow(label: String, value: Int, invert: Boolean = false) {
     val filled = (value.coerceIn(0, 100) * segments) / 100
     val bar = "█".repeat(filled) + "░".repeat(segments - filled)
     Row(modifier = GlanceModifier.fillMaxWidth()) {
-        Text(label.padEnd(11).take(11), style = TextStyle(color = ColorProvider(Muted)))
-        Text("[$bar]", style = TextStyle(color = ColorProvider(color)))
+        Text(label.padEnd(11).take(11), style = TextStyle(color = ColorProvider(Muted), fontSize = 12.sp))
+        Text("[$bar]", style = TextStyle(color = ColorProvider(color), fontSize = 12.sp))
         Spacer(GlanceModifier.width(4.dp))
-        Text(value.toString().padStart(3), style = TextStyle(color = ColorProvider(color), fontWeight = FontWeight.Bold))
+        Text(
+            value.toString().padStart(3),
+            style = TextStyle(color = ColorProvider(color), fontWeight = FontWeight.Bold, fontSize = 12.sp),
+        )
     }
 }
 
+/**
+ * A tappable "chip" button that fills its share of the row ([defaultWeight]) so
+ * every button is a large, obvious tap target with a coloured background.
+ */
 @Composable
 private fun WidgetActionButton(
     label: String,
     type: HabitType,
     quantity: Double,
+    bg: Color,
+    fg: Color,
     ruleId: String? = null,
-    mood: Int? = null,
 ) {
     val params = actionParametersOf(
         LogHabitAction.typeKey to type.name,
         LogHabitAction.quantityKey to quantity,
     ).toMutableParameters().apply {
         if (ruleId != null) set(LogHabitAction.ruleKey, ruleId)
-        if (mood != null) set(LogHabitAction.moodKey, mood)
     }
-    Text(
-        text = "[$label]",
+    Box(
         modifier = GlanceModifier
-            .padding(3.dp)
-            .clickable(actionRunCallback<LogHabitAction>(params)),
-        style = TextStyle(color = ColorProvider(Green), fontWeight = FontWeight.Bold),
-    )
+            .defaultWeight()
+            .padding(horizontal = 2.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            modifier = GlanceModifier
+                .fillMaxWidth()
+                .background(bg)
+                .padding(vertical = 7.dp)
+                .clickable(actionRunCallback<LogHabitAction>(params)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = label,
+                style = TextStyle(color = ColorProvider(fg), fontWeight = FontWeight.Bold, fontSize = 12.sp),
+            )
+        }
+    }
 }

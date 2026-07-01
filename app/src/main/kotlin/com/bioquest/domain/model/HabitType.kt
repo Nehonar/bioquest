@@ -9,6 +9,7 @@ enum class HabitType {
     WATER,
     FRUIT,
     HEALTHY_MEAL,
+    NORMAL_MEAL,
     RISK_FOOD,
     EXERCISE,
     MOOD,

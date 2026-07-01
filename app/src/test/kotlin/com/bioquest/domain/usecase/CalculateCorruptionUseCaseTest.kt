@@ -139,4 +139,34 @@ class CalculateCorruptionUseCaseTest {
         assertEquals(0, result.rawPoints)
         assertEquals(CorruptionLevel.NORMAL, result.level)
     }
+
+    private fun normalMealLog(daysAgo: Long): HabitLogEntry {
+        val date = reference.minusDays(daysAgo)
+        val millis = date.atStartOfDay(zone).toInstant().toEpochMilli() + 12 * 3_600_000L
+        return HabitLogEntry(type = HabitType.NORMAL_MEAL, timestampMillis = millis, quantity = 1.0)
+    }
+
+    @Test
+    fun `normal meals never add corruption`() {
+        // A window of only normal meals must read as clean: not risk food.
+        val logs = (0L until 5L).map { normalMealLog(it) }
+        val result = useCase(logs, rules, reference)
+        assertEquals(0, result.rawPoints)
+        assertEquals(CorruptionLevel.NORMAL, result.level)
+        assertFalse(result.chainDamage)
+    }
+
+    @Test
+    fun `a normal meal day breaks a would-be chain`() {
+        // Risk on day 0 and day 2, only a normal meal on day 1: the normal meal
+        // is NOT risk food, so it must not bridge the days into a 3-day chain.
+        val logs = listOf(
+            riskLog("ice_cream", 0),
+            normalMealLog(1),
+            riskLog("ice_cream", 2),
+        )
+        val result = useCase(logs, rules, reference)
+        assertFalse(result.chainDamage)
+        assertEquals(1, result.chainLength)
+    }
 }

@@ -66,6 +66,7 @@ private fun describe(log: HabitLogEntry): Pair<String, androidx.compose.ui.graph
     HabitType.WATER -> "WATER +${log.quantity.toInt()}ml" to PhosphorGreen
     HabitType.FRUIT -> "FRUIT +${log.quantity.toInt()}" to PhosphorGreen
     HabitType.HEALTHY_MEAL -> "HEALTHY MEAL" to PhosphorGreen
+    HabitType.NORMAL_MEAL -> "NORMAL MEAL" to Amber
     HabitType.RISK_FOOD -> "RISK FOOD [${log.foodRuleId ?: "custom"}]" to AlertRed
     HabitType.EXERCISE -> "EXERCISE +${log.quantity.toInt()}min" to Amber
     HabitType.MOOD -> "MOOD ${log.moodValue ?: log.quantity.toInt()}/5" to Amber

@@ -39,6 +39,7 @@ class LogHabitUseCase(
             HabitType.WATER -> 250.0
             HabitType.FRUIT -> 1.0
             HabitType.HEALTHY_MEAL -> 1.0
+            HabitType.NORMAL_MEAL -> 1.0
             HabitType.RISK_FOOD -> 1.0
             HabitType.EXERCISE -> 30.0
             HabitType.MOOD -> 3.0

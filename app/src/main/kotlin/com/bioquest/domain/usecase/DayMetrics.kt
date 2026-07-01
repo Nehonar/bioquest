@@ -95,6 +95,11 @@ object DayMetricsAggregator {
                     healthy += qty.toInt()
                     nutritionXp += 3 * qty.toInt()
                 }
+                HabitType.NORMAL_MEAL -> {
+                    // A regular meal: mildly positive, never counts as risk food
+                    // (so it can't trigger a corruption chain) and adds no points.
+                    nutritionXp += 1 * qty.toInt()
+                }
                 HabitType.RISK_FOOD -> {
                     val rule = log.foodRuleId?.let { rules[it] }
                     val points = (rule?.corruptionPoints ?: 2) * qty.toInt()

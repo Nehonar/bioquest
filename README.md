@@ -37,8 +37,11 @@ Incluido y funcional:
 - Motor de **corrupcion por ventana de 30 dias** (`CalculateCorruptionUseCase`)
   con acumulacion, cadena (chain damage) y mitigacion por contexto positivo.
 - **Persistencia Room** (8 entidades) + **DataStore** para preferencias.
-- **Widget Bio Core 4x2** (Glance) con 4 stats + corrupcion, siguiente quest y
-  botones de accion rapida (Agua / Fruta / Capricho / Mood).
+- **Widget Bio Core 4x2** (Glance) con 4 stats + corrupcion y dos filas de
+  botones de accion rapida como "chips" con fondo de color: fila positiva
+  (Agua / Fruta / Sano) y fila neutra+riesgo (Normal / Procesado / Bolleria).
+  El layout es compacto a proposito: un Column de Glance no hace scroll, asi
+  que los botones se mantienen siempre visibles y pulsables.
 - **Widget Quick Action 1x1** configurable (Agua / Fruta / Mood / Capricho).
 - Pantallas Compose: **Dashboard, Daily Log, Quest Board, History, Settings**.
 - **Quests** diarias adaptativas + semanales.
@@ -46,7 +49,7 @@ Incluido y funcional:
   se ven sin configurar nada.
 - **Health Connect** como capa opcional (pasos) + fallback `SensorManager`.
 - **WorkManager** para sync periodica y **recordatorios contextuales**.
-- **Tests unitarios** de los dos motores (16 tests, verdes).
+- **Tests unitarios** de los dos motores (18 tests, verdes).
 
 Deuda tecnica / siguientes fases (documentada, fuera del alcance de Fase 1):
 
@@ -113,6 +116,7 @@ a una ventana movil de 30 dias.
 | Agua 250 ml | +1 Vitality XP | 0 |
 | Fruta | +2 | 0 |
 | Comida saludable | +3 | 0 |
+| Comida normal | +1 | 0 |
 | Helado | 0 | +2 |
 | Croissant/bolleria | 0 | +3 |
 | Fast food/pizza | 0 | +4 |

@@ -58,6 +58,7 @@ fun DailyLogScreen(state: UiState, viewModel: BioQuestViewModel) {
                 QuickButton("AGUA +250", HabitType.WATER, 250.0),
                 QuickButton("FRUTA +1", HabitType.FRUIT, 1.0),
                 QuickButton("COMIDA SANA", HabitType.HEALTHY_MEAL, 1.0),
+                QuickButton("COMIDA NORMAL", HabitType.NORMAL_MEAL, 1.0),
                 QuickButton("EJERCICIO +30", HabitType.EXERCISE, 30.0),
                 QuickButton("PAUSA", HabitType.REST_BREAK, 1.0),
             )
