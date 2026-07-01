@@ -67,6 +67,8 @@ fun SettingsScreen(state: UiState, viewModel: BioQuestViewModel) {
             }
         }
 
+        item { ReminderEditor(state.reminderIntervalHours, onSave = viewModel::setReminderInterval) }
+
         item {
             SectionHeader("Permisos")
             TerminalPanel {
@@ -120,6 +122,28 @@ private fun GoalEditor(goals: UserGoal, onSave: (UserGoal) -> Unit) {
             },
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
         ) { Text("GUARDAR OBJETIVOS") }
+    }
+}
+
+@Composable
+private fun ReminderEditor(currentHours: Int, onSave: (Int) -> Unit) {
+    var hours by remember(currentHours) { mutableFloatStateOf(currentHours.toFloat()) }
+    TerminalPanel(title = "RECORDATORIOS") {
+        Text(
+            "Si pasan las horas sin registrar nada (en horario diurno), BioQuest " +
+                "pregunta \"¿has bebido o comido?\" con botones de 1 toque.",
+            style = MaterialTheme.typography.labelSmall,
+            color = TerminalMuted,
+            modifier = Modifier.padding(bottom = 6.dp),
+        )
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text("Cada", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("${hours.toInt()} h", color = Amber)
+        }
+        Slider(value = hours, onValueChange = { hours = it }, valueRange = 1f..8f, steps = 6)
+        Button(onClick = { onSave(hours.toInt()) }, modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
+            Text("GUARDAR CADENCIA")
+        }
     }
 }
 

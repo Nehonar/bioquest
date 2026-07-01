@@ -48,7 +48,11 @@ Incluido y funcional:
 - **Datos demo** (~3 semanas) sembrados al primer arranque: la app y el widget
   se ven sin configurar nada.
 - **Health Connect** como capa opcional (pasos) + fallback `SensorManager`.
-- **WorkManager** para sync periodica y **recordatorios contextuales**.
+- **WorkManager** para sync periodica y **recordatorios contextuales**, con
+  **cadencia configurable** (1-8 h) desde Settings. Si pasan las horas sin
+  registrar nada en horario diurno, un **check-in de inactividad** pregunta
+  "¿has bebido o comido?" con botones de accion (Agua / Sano / Bolleria) que
+  registran el habito directamente desde la notificacion.
 - **Tests unitarios** de los dos motores (18 tests, verdes).
 
 Deuda tecnica / siguientes fases (documentada, fuera del alcance de Fase 1):

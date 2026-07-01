@@ -75,5 +75,10 @@
                 android:resource="@xml/quick_action_widget_info" />
         </receiver>
 
+        <!-- Logs a habit from a reminder notification action button -->
+        <receiver
+            android:name=".notifications.HabitLogReceiver"
+            android:exported="false" />
+
     </application>
 </manifest>

@@ -24,7 +24,7 @@ class BioQuestApplication : Application() {
         appScope.launch { seedOnFirstRun() }
 
         SyncScheduler.schedule(this)
-        ReminderScheduler.schedule(this)
+        appScope.launch { ReminderScheduler.schedule(this@BioQuestApplication) }
     }
 
     private suspend fun seedOnFirstRun() {

@@ -12,10 +12,13 @@ import com.bioquest.domain.model.HabitLogEntry
 import com.bioquest.domain.model.HabitType
 import com.bioquest.domain.model.StatType
 import com.bioquest.domain.model.UserGoal
+import com.bioquest.notifications.ReminderScheduler
+import com.bioquest.settings.AppPreferences
 import com.bioquest.widget.BioCoreWidget
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 data class UiState(
@@ -23,6 +26,7 @@ data class UiState(
     val snapshot: GameSnapshot? = null,
     val recentLogs: List<HabitLogEntry> = emptyList(),
     val foodRules: List<FoodImpactRule> = FoodImpactRule.DEFAULTS,
+    val reminderIntervalHours: Int = AppPreferences.DEFAULT_REMINDER_HOURS,
 )
 
 class BioQuestViewModel(app: Application) : AndroidViewModel(app) {
@@ -41,7 +45,8 @@ class BioQuestViewModel(app: Application) : AndroidViewModel(app) {
             val snapshot = container.engine.snapshot()
             val recent = container.repository.recentLogs(30)
             val rules = container.repository.foodRules()
-            _state.value = UiState(false, snapshot, recent, rules)
+            val reminderHours = container.preferences.reminderIntervalHours.first()
+            _state.value = UiState(false, snapshot, recent, rules, reminderHours)
         }
     }
 
@@ -78,6 +83,15 @@ class BioQuestViewModel(app: Application) : AndroidViewModel(app) {
             container.repository.updateGoals(goals)
             refresh()
             BioCoreWidget.requestUpdate(getApplication())
+        }
+    }
+
+    /** Persist the reminder cadence and reschedule the periodic worker. */
+    fun setReminderInterval(hours: Int) {
+        viewModelScope.launch {
+            container.preferences.setReminderIntervalHours(hours)
+            ReminderScheduler.reschedule(getApplication(), hours)
+            refresh()
         }
     }
 
