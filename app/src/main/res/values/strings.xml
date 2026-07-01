@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BioQuest</string>
+    <string name="bio_core_widget_description">Bio Core: stats y acciones rapidas</string>
+    <string name="quick_action_widget_description">Accion rapida BioQuest</string>
+</resources>
