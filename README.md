@@ -140,8 +140,9 @@ Ejemplos (cubiertos por tests):
 
 ## Build
 
-Requisitos: JDK 17+, Android SDK (compileSdk 35), un dispositivo/emulador
-Android 8.0+ (minSdk 26).
+Requisitos: JDK 17+, Android SDK Platform 36 (compileSdk 36, exigido por
+Health Connect), Android Gradle Plugin 8.9.1+, un dispositivo/emulador
+Android 8.0+ (minSdk 26). `targetSdk` se mantiene en 35.
 
 ```bash
 # Compilar debug

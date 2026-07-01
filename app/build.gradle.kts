@@ -7,7 +7,10 @@ plugins {
 
 android {
     namespace = "com.bioquest"
-    compileSdk = 35
+    // Health Connect connect-client 1.1.0-rc02 requires compiling against
+    // API 36 (and AGP 8.9.1+). targetSdk stays at 35 so we don't opt into new
+    // runtime behavior yet — the two can move independently.
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.bioquest"
