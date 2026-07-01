@@ -20,6 +20,7 @@ import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
+import androidx.glance.layout.RowScope
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
@@ -30,7 +31,6 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import androidx.compose.runtime.Composable
-import androidx.glance.layout.defaultWeight
 import com.bioquest.BioQuestApplication
 import com.bioquest.domain.model.HabitType
 import com.bioquest.domain.model.WidgetState
@@ -148,9 +148,12 @@ private fun WidgetStatRow(label: String, value: Int, invert: Boolean = false) {
 /**
  * A tappable "chip" button that fills its share of the row ([defaultWeight]) so
  * every button is a large, obvious tap target with a coloured background.
+ *
+ * Declared as a [RowScope] extension because Glance exposes `defaultWeight()`
+ * only inside a Row/Column scope — there is no importable top-level function.
  */
 @Composable
-private fun WidgetActionButton(
+private fun RowScope.WidgetActionButton(
     label: String,
     type: HabitType,
     quantity: Double,
