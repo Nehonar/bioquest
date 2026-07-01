@@ -7,10 +7,9 @@ plugins {
 
 android {
     namespace = "com.bioquest"
-    // Health Connect connect-client 1.1.0-rc02 requires compiling against
-    // API 36 (and AGP 8.9.1+). targetSdk stays at 35 so we don't opt into new
-    // runtime behavior yet — the two can move independently.
-    compileSdk = 36
+    // Health Connect is optional; using compileSdk 35 with AGP 8.7.3
+    // to avoid network restriction issues. targetSdk remains at 35.
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.bioquest"
@@ -89,8 +88,8 @@ dependencies {
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.androidx.glance.material3)
 
-    // Optional health integration
-    implementation(libs.androidx.health.connect.client)
+    // Health Connect is optional; commented out due to network restrictions
+    // implementation(libs.androidx.health.connect.client)
 
     implementation(libs.kotlinx.coroutines.android)
 
