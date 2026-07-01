@@ -120,7 +120,7 @@ private fun WidgetStatRow(label: String, value: Int, invert: Boolean = false) {
     }
     val segments = 10
     val filled = (value.coerceIn(0, 100) * segments) / 100
-    val bar = "#".repeat(filled) + "-".repeat(segments - filled)
+    val bar = "█".repeat(filled) + "░".repeat(segments - filled)
     Row(modifier = GlanceModifier.fillMaxWidth()) {
         Text(label.padEnd(11).take(11), style = TextStyle(color = ColorProvider(Muted)))
         Text("[$bar]", style = TextStyle(color = ColorProvider(color)))
