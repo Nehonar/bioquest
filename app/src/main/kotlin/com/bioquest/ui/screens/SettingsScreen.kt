@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -69,6 +70,8 @@ fun SettingsScreen(state: UiState, viewModel: BioQuestViewModel) {
 
         item { ReminderEditor(state.reminderIntervalHours, onSave = viewModel::setReminderInterval) }
 
+        item { DataPanel(onStartFresh = viewModel::startFresh, onSeedDemo = viewModel::seedDemo) }
+
         item {
             SectionHeader("Permisos")
             TerminalPanel {
@@ -122,6 +125,45 @@ private fun GoalEditor(goals: UserGoal, onSave: (UserGoal) -> Unit) {
             },
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
         ) { Text("GUARDAR OBJETIVOS") }
+    }
+}
+
+@Composable
+private fun DataPanel(onStartFresh: () -> Unit, onSeedDemo: () -> Unit) {
+    // Two-tap confirmation for the destructive action, terminal style.
+    var armed by remember { mutableStateOf(false) }
+    TerminalPanel(title = "DATOS") {
+        Text(
+            "Empezar de cero borra todo el historial (registros, pasos, eventos). " +
+                "Objetivos y reglas de comida se conservan.",
+            style = MaterialTheme.typography.labelSmall,
+            color = TerminalMuted,
+        )
+        Button(
+            onClick = {
+                if (armed) {
+                    armed = false
+                    onStartFresh()
+                } else {
+                    armed = true
+                }
+            },
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+        ) {
+            Text(
+                if (armed) "¿SEGURO? TOCA OTRA VEZ PARA BORRAR" else "EMPEZAR DE CERO",
+                color = AlertRed,
+            )
+        }
+        Button(
+            onClick = {
+                armed = false
+                onSeedDemo()
+            },
+            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+        ) {
+            Text("CARGAR DATOS DEMO (3 SEMANAS)", color = Amber)
+        }
     }
 }
 

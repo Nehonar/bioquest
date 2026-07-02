@@ -37,4 +37,10 @@ interface BioQuestRepository {
     suspend fun stepsByDate(start: LocalDate, end: LocalDate): Map<LocalDate, Int>
 
     suspend fun setSteps(date: LocalDate, steps: Int)
+
+    /**
+     * Wipes all tracked history (logs, steps, snapshots, quest completions,
+     * events) for a true fresh start. Goals and food rules are preserved.
+     */
+    suspend fun clearHistory()
 }

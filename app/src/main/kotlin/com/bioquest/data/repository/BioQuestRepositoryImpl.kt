@@ -66,4 +66,12 @@ class BioQuestRepositoryImpl(
 
     override suspend fun setSteps(date: LocalDate, steps: Int) =
         stepDao.upsert(StepCountEntity(date.toEpochDay(), steps))
+
+    override suspend fun clearHistory() {
+        habitDao.clearAll()
+        stepDao.clearAll()
+        db.dailyStatSnapshotDao().clearAll()
+        db.questCompletionDao().clearAll()
+        db.healthEventDao().clearAll()
+    }
 }

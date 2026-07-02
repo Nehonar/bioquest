@@ -34,6 +34,9 @@ interface HabitLogDao {
 
     @Query("SELECT COUNT(*) FROM habit_log")
     suspend fun count(): Int
+
+    @Query("DELETE FROM habit_log")
+    suspend fun clearAll()
 }
 
 @Dao
@@ -73,6 +76,9 @@ interface StepCountDao {
 
     @Upsert
     suspend fun upsert(entity: StepCountEntity)
+
+    @Query("DELETE FROM step_count")
+    suspend fun clearAll()
 }
 
 @Dao
@@ -82,6 +88,9 @@ interface DailyStatSnapshotDao {
 
     @Query("SELECT * FROM daily_stat_snapshot ORDER BY epochDay DESC LIMIT :limit")
     suspend fun recent(limit: Int): List<DailyStatSnapshotEntity>
+
+    @Query("DELETE FROM daily_stat_snapshot")
+    suspend fun clearAll()
 }
 
 @Dao
@@ -91,6 +100,9 @@ interface QuestCompletionDao {
 
     @Query("SELECT * FROM quest_completion WHERE epochDay = :epochDay")
     suspend fun forDay(epochDay: Long): List<QuestCompletionEntity>
+
+    @Query("DELETE FROM quest_completion")
+    suspend fun clearAll()
 }
 
 @Dao
@@ -100,6 +112,9 @@ interface HealthEventDao {
 
     @Query("SELECT * FROM health_event ORDER BY timestampMillis DESC LIMIT :limit")
     fun observeRecent(limit: Int): Flow<List<HealthEventEntity>>
+
+    @Query("DELETE FROM health_event")
+    suspend fun clearAll()
 }
 
 @Dao

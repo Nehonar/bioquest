@@ -56,6 +56,10 @@ fun DashboardScreen(state: UiState, viewModel: BioQuestViewModel) {
             return@Column
         }
 
+        // How-it-works primer: expanded until the user has logged something.
+        ProtocolPanel(startExpanded = state.recentLogs.isEmpty())
+        Spacer(Modifier.height(12.dp))
+
         // Character card
         TerminalPanel(title = "CHARACTER") {
             Text(
@@ -136,5 +140,31 @@ fun DashboardScreen(state: UiState, viewModel: BioQuestViewModel) {
             }
         }
         Spacer(Modifier.height(24.dp))
+    }
+}
+
+@Composable
+private fun ProtocolPanel(startExpanded: Boolean) {
+    var expanded by remember { mutableStateOf(startExpanded) }
+    TerminalPanel {
+        Row(
+            Modifier.fillMaxWidth().clickable { expanded = !expanded },
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text("// PROTOCOLO — como funciona", style = MaterialTheme.typography.labelLarge, color = PhosphorGreen)
+            Text(if (expanded) "[-]" else "[+]", color = TerminalMuted)
+        }
+        if (expanded) {
+            Spacer(Modifier.height(6.dp))
+            listOf(
+                "1. Registra lo que haces (agua, comida, ejercicio, mood) desde LOG o el widget. 1 toque = 1 registro.",
+                "2. Tus stats parten de un estado natural (~40-60) y llevan el momentum de tus ultimos 7 dias: nada se resetea a cero a medianoche.",
+                "3. Lo que no registres cuenta como neutro, nunca como malo. Registrar solo puede ayudarte a entender tus patrones.",
+                "4. CORRUPTION mide comida de riesgo acumulada en 30 dias. Nada esta prohibido: un helado apenas importa, quince bollos si.",
+                "5. Tu clase (Balanced Human, Iron Monk...) refleja tu tendencia semanal, no la hora del dia.",
+            ).forEach {
+                Text(it, style = MaterialTheme.typography.bodyMedium, color = TerminalMuted, modifier = Modifier.padding(vertical = 2.dp))
+            }
+        }
     }
 }

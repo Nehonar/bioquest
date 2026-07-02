@@ -9,9 +9,10 @@ import java.time.ZoneId
 import kotlin.random.Random
 
 /**
- * Seeds default food rules and ~3 weeks of believable demo history so the app,
- * widget and corruption engine are visible without configuring Health Connect.
- * Idempotent via the AppPreferences.demoSeeded flag.
+ * Seeds default food rules on first run. Demo history is NO longer seeded
+ * automatically — a fresh install starts clean, in a natural baseline state.
+ * [seedHistory] stays available behind the "Cargar datos demo" button in
+ * Settings for anyone who wants to see the engine populated.
  */
 class DemoDataSeeder(
     private val repository: BioQuestRepository,
@@ -49,11 +50,9 @@ class DemoDataSeeder(
         if (rng.nextInt(10) < 6) {
             entries += HabitLogEntry(type = HabitType.HEALTHY_MEAL, timestampMillis = at(14), quantity = 1.0)
         }
-        // A recent risk-food cluster to make corruption visible (last 4 days).
-        if (offset in 0..3 && rng.nextInt(10) < 7) {
-            val rule = listOf("ice_cream", "pastry", "fast_food").random(rng)
-            entries += HabitLogEntry(type = HabitType.RISK_FOOD, timestampMillis = at(20), quantity = 1.0, foodRuleId = rule)
-        } else if (rng.nextInt(10) < 2) {
+        // An occasional treat — enough to show corruption accumulating without
+        // making the demo user start "wrecked".
+        if (rng.nextInt(10) < 2) {
             entries += HabitLogEntry(type = HabitType.RISK_FOOD, timestampMillis = at(20), quantity = 1.0, foodRuleId = "ice_cream")
         }
         // Exercise a few times a week.

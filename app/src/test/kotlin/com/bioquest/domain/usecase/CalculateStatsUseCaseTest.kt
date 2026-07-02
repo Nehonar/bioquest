@@ -1,7 +1,7 @@
 package com.bioquest.domain.usecase
 
+import com.bioquest.domain.model.CharacterClass
 import com.bioquest.domain.model.CorruptionResult
-import com.bioquest.domain.model.FoodImpactRule
 import com.bioquest.domain.model.HabitLogEntry
 import com.bioquest.domain.model.HabitType
 import com.bioquest.domain.model.StatType
@@ -20,8 +20,15 @@ class CalculateStatsUseCaseTest {
     private val goals = UserGoal.DEFAULT
     private val reference = LocalDate.of(2026, 6, 30)
 
-    private fun log(type: HabitType, quantity: Double = 1.0, mood: Int? = null, sleep: Double? = null): HabitLogEntry {
-        val millis = reference.atStartOfDay(zone).toInstant().toEpochMilli() + 9 * 3_600_000L
+    private fun log(
+        type: HabitType,
+        quantity: Double = 1.0,
+        mood: Int? = null,
+        sleep: Double? = null,
+        daysAgo: Long = 0,
+    ): HabitLogEntry {
+        val millis = reference.minusDays(daysAgo)
+            .atStartOfDay(zone).toInstant().toEpochMilli() + 9 * 3_600_000L
         return HabitLogEntry(
             type = type,
             timestampMillis = millis,
@@ -32,14 +39,55 @@ class CalculateStatsUseCaseTest {
     }
 
     @Test
-    fun `empty day produces low but non-negative stats`() {
+    fun `empty day produces stats in range`() {
         val stats = useCase(reference, emptyList(), CorruptionResult.empty(goals), goals)
         StatType.values().forEach {
             val v = stats.of(it).value
             assertTrue("${it.label} in range", v in 0..100)
         }
-        // With no logs, corruption stat is 0 and vitality is just the base.
         assertEquals(0, stats.corruption)
+    }
+
+    @Test
+    fun `fresh start lands in a natural functional state, not wrecked`() {
+        // No history at all: natural base + neutral momentum. A new user is a
+        // functional Balanced Human, never a corpse or a Desk Goblin.
+        val stats = useCase(reference, emptyList(), CorruptionResult.empty(goals), goals)
+        assertTrue("vitality should be natural (>=40), was ${stats.vitality}", stats.vitality >= 40)
+        assertTrue("recovery should be natural (>=50), was ${stats.recovery}", stats.recovery >= 50)
+        assertTrue("strength should be natural (>=40), was ${stats.strength}", stats.strength >= 40)
+        assertEquals(CharacterClass.BALANCED_HUMAN, CharacterClass.fromStats(stats))
+    }
+
+    @Test
+    fun `a strong tracked week carries momentum into an empty morning`() {
+        // Exercise + steps every day last week, nothing yet today.
+        val history = (1L..7L).map { log(HabitType.EXERCISE, 30.0, daysAgo = it) }
+        val stepsByDate = (1L..7L).associate { reference.minusDays(it) to 7500 }
+
+        val withMomentum = useCase(
+            reference, history, CorruptionResult.empty(goals), goals,
+            stepsByDate = stepsByDate,
+        )
+        val freshStart = useCase(reference, emptyList(), CorruptionResult.empty(goals), goals)
+
+        assertTrue(
+            "a good week (${withMomentum.strength}) must beat a fresh start (${freshStart.strength})",
+            withMomentum.strength > freshStart.strength,
+        )
+    }
+
+    @Test
+    fun `unlogged sleep is neutral, never worse than terrible sleep`() {
+        val noSleepLog = useCase(reference, emptyList(), CorruptionResult.empty(goals), goals)
+        val terribleSleep = useCase(
+            reference, listOf(log(HabitType.SLEEP_MANUAL, sleep = 3.0)),
+            CorruptionResult.empty(goals), goals,
+        )
+        assertTrue(
+            "not logging (${noSleepLog.recovery}) must not read worse than 3h sleep (${terribleSleep.recovery})",
+            noSleepLog.recovery >= terribleSleep.recovery,
+        )
     }
 
     @Test

@@ -26,6 +26,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.bioquest.domain.model.FoodImpactRule
@@ -41,8 +44,12 @@ import com.bioquest.ui.theme.TerminalMuted
 
 private data class QuickButton(val label: String, val type: HabitType, val quantity: Double, val accent: Boolean = false)
 
+/** Confirm a tap physically: every log button vibrates on press. */
+private fun HapticFeedback.confirm() = performHapticFeedback(HapticFeedbackType.LongPress)
+
 @Composable
 fun DailyLogScreen(state: UiState, viewModel: BioQuestViewModel) {
+    val haptics = LocalHapticFeedback.current
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -70,7 +77,10 @@ fun DailyLogScreen(state: UiState, viewModel: BioQuestViewModel) {
             ) {
                 items(buttons) { b ->
                     Button(
-                        onClick = { viewModel.log(b.type, b.quantity) },
+                        onClick = {
+                            haptics.confirm()
+                            viewModel.log(b.type, b.quantity)
+                        },
                         modifier = Modifier.fillMaxWidth().height(52.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                     ) {
@@ -80,11 +90,26 @@ fun DailyLogScreen(state: UiState, viewModel: BioQuestViewModel) {
             }
         }
 
-        item { MoodSlider(onLog = { viewModel.log(HabitType.MOOD, moodValue = it) }) }
+        item {
+            MoodSlider(onLog = {
+                haptics.confirm()
+                viewModel.log(HabitType.MOOD, moodValue = it)
+            })
+        }
 
-        item { WeightInput(onLog = { viewModel.log(HabitType.WEIGHT, weightKg = it) }) }
+        item {
+            WeightInput(onLog = {
+                haptics.confirm()
+                viewModel.log(HabitType.WEIGHT, weightKg = it)
+            })
+        }
 
-        item { SleepInput(onLog = { viewModel.log(HabitType.SLEEP_MANUAL, sleepHours = it) }) }
+        item {
+            SleepInput(onLog = {
+                haptics.confirm()
+                viewModel.log(HabitType.SLEEP_MANUAL, sleepHours = it)
+            })
+        }
 
         item { SectionHeader("Comida de riesgo / capricho") }
         item {
@@ -95,7 +120,10 @@ fun DailyLogScreen(state: UiState, viewModel: BioQuestViewModel) {
             )
         }
         items(state.foodRules.filter { it.corruptionPoints > 0 }) { rule ->
-            RiskFoodRow(rule) { viewModel.log(HabitType.RISK_FOOD, 1.0, foodRuleId = rule.id) }
+            RiskFoodRow(rule) {
+                haptics.confirm()
+                viewModel.log(HabitType.RISK_FOOD, 1.0, foodRuleId = rule.id)
+            }
         }
     }
 }

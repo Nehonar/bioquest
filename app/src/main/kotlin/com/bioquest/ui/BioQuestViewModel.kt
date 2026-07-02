@@ -15,8 +15,11 @@ import com.bioquest.domain.model.UserGoal
 import com.bioquest.notifications.ReminderScheduler
 import com.bioquest.settings.AppPreferences
 import com.bioquest.widget.BioCoreWidget
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -35,6 +38,10 @@ class BioQuestViewModel(app: Application) : AndroidViewModel(app) {
 
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state.asStateFlow()
+
+    /** One-shot confirmations ("► AGUA registrado") consumed by the snackbar. */
+    private val _feedback = MutableSharedFlow<String>(extraBufferCapacity = 8)
+    val feedback: SharedFlow<String> = _feedback.asSharedFlow()
 
     init {
         refresh()
@@ -62,6 +69,7 @@ class BioQuestViewModel(app: Application) : AndroidViewModel(app) {
             container.logHabit(type, quantity, foodRuleId, moodValue, weightKg, sleepHours)
             refresh()
             BioCoreWidget.requestUpdate(getApplication())
+            _feedback.tryEmit("► ${actionLabel(type, quantity, foodRuleId)} REGISTRADO")
         }
     }
 
@@ -70,7 +78,41 @@ class BioQuestViewModel(app: Application) : AndroidViewModel(app) {
             container.repository.deleteLog(id)
             refresh()
             BioCoreWidget.requestUpdate(getApplication())
+            _feedback.tryEmit("► REGISTRO ELIMINADO")
         }
+    }
+
+    /** Wipes all tracked history for a true fresh start (goals/rules kept). */
+    fun startFresh() {
+        viewModelScope.launch {
+            container.repository.clearHistory()
+            refresh()
+            BioCoreWidget.requestUpdate(getApplication())
+            _feedback.tryEmit("► CORE REINICIADO — historial borrado")
+        }
+    }
+
+    /** Loads ~3 weeks of demo history (opt-in, from Settings). */
+    fun seedDemo() {
+        viewModelScope.launch {
+            container.demoSeeder.seedHistory()
+            refresh()
+            BioCoreWidget.requestUpdate(getApplication())
+            _feedback.tryEmit("► DATOS DEMO CARGADOS (3 semanas)")
+        }
+    }
+
+    private fun actionLabel(type: HabitType, quantity: Double, foodRuleId: String?): String = when (type) {
+        HabitType.WATER -> "AGUA +${quantity.toInt()}ml"
+        HabitType.FRUIT -> "FRUTA +${quantity.toInt()}"
+        HabitType.HEALTHY_MEAL -> "COMIDA SANA"
+        HabitType.NORMAL_MEAL -> "COMIDA NORMAL"
+        HabitType.RISK_FOOD -> "CAPRICHO [${foodRuleId ?: "custom"}]"
+        HabitType.EXERCISE -> "EJERCICIO +${quantity.toInt()}min"
+        HabitType.MOOD -> "MOOD"
+        HabitType.WEIGHT -> "PESO"
+        HabitType.SLEEP_MANUAL -> "SUENO"
+        HabitType.REST_BREAK -> "PAUSA"
     }
 
     fun explain(type: StatType): List<String> {

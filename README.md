@@ -33,7 +33,12 @@ widget 4x2**, mas el resto de pantallas del MVP.
 Incluido y funcional:
 
 - Motor de **stats transparente** (`CalculateStatsUseCase`) — cada stat guarda
-  sus contribuciones y puede explicar por que subio o bajo.
+  sus contribuciones y puede explicar por que subio o bajo. Cuatro principios:
+  **estado natural** (sin registrar nada eres un humano funcional, ~40-60, no
+  un cadaver), **inercia** (las stats llevan el momentum de tus ultimos 7 dias,
+  nada se resetea a cero a medianoche), **dato ausente = neutro** (no registrar
+  sueno/mood nunca puntua como haberlo hecho mal) y **hoy importa** (las
+  acciones del dia mueven las barras hasta ~50 puntos).
 - Motor de **corrupcion por ventana de 30 dias** (`CalculateCorruptionUseCase`)
   con acumulacion, cadena (chain damage) y mitigacion por contexto positivo.
 - **Persistencia Room** (8 entidades) + **DataStore** para preferencias.
@@ -45,15 +50,21 @@ Incluido y funcional:
 - **Widget Quick Action 1x1** configurable (Agua / Fruta / Mood / Capricho).
 - Pantallas Compose: **Dashboard, Daily Log, Quest Board, History, Settings**.
 - **Quests** diarias adaptativas + semanales.
-- **Datos demo** (~3 semanas) sembrados al primer arranque: la app y el widget
-  se ven sin configurar nada.
+- **Feedback inmediato**: cada registro vibra (haptics) y confirma con un
+  snackbar ("► AGUA +250ml REGISTRADO"), desde la app o el widget.
+- **Empezar de cero real**: el primer arranque solo siembra reglas de comida;
+  el historial demo (~3 semanas) es opt-in desde Settings, donde tambien hay
+  un boton "Empezar de cero" que borra todo el historial (conserva objetivos
+  y reglas).
+- **Panel PROTOCOLO** en el Dashboard que explica el bucle de juego; se
+  muestra expandido hasta que registras tu primera accion.
 - **Health Connect** como capa opcional (pasos) + fallback `SensorManager`.
 - **WorkManager** para sync periodica y **recordatorios contextuales**, con
   **cadencia configurable** (1-8 h) desde Settings. Si pasan las horas sin
   registrar nada en horario diurno, un **check-in de inactividad** pregunta
   "¿has bebido o comido?" con botones de accion (Agua / Sano / Bolleria) que
   registran el habito directamente desde la notificacion.
-- **Tests unitarios** de los dos motores (18 tests, verdes).
+- **Tests unitarios** de los dos motores (21 tests, verdes).
 
 Deuda tecnica / siguientes fases (documentada, fuera del alcance de Fase 1):
 
@@ -162,7 +173,7 @@ Android 8.0+ (minSdk 26). `targetSdk` se mantiene en 35.
 
 > Los tests del dominio son Kotlin/JVM puro. Se pueden ejecutar sin Android SDK
 > copiando `app/src/main/kotlin/com/bioquest/domain` y `app/src/test/...` a un
-> proyecto `kotlin("jvm")` con JUnit — asi se validaron los 16 tests de esta
+> proyecto `kotlin("jvm")` con JUnit — asi se validaron los 21 tests de esta
 > entrega.
 
 Al primer arranque se siembran reglas de comida por defecto y ~3 semanas de

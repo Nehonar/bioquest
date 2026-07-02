@@ -30,8 +30,10 @@ class BioQuestApplication : Application() {
     private suspend fun seedOnFirstRun() {
         val prefs = container.preferences
         if (!prefs.demoSeeded.first()) {
+            // Only default food rules: a fresh install starts with a clean
+            // history and natural-baseline stats. Demo history is opt-in from
+            // Settings ("Cargar datos demo").
             container.demoSeeder.seedFoodRules()
-            container.demoSeeder.seedHistory()
             prefs.setDemoSeeded(true)
         }
     }

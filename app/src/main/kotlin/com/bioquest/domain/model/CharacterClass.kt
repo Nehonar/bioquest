@@ -13,12 +13,18 @@ enum class CharacterClass(val title: String, val blurb: String) {
     BALANCED_HUMAN("Balanced Human", "Todo en orden. Sigue asi.");
 
     companion object {
+        /**
+         * Stats now carry a natural base (35) plus 7-day momentum, so a fresh
+         * start floors around 42 and lands on BALANCED_HUMAN. DESK_GOBLIN is
+         * only reachable when a *tracked* week shows genuinely low movement
+         * (momentum near 0), never just because it's early in the morning.
+         */
         fun fromStats(stats: CharacterStats): CharacterClass = when {
             stats.corruption >= 60 -> CHAOS_SNACKER
             stats.strength >= 70 -> IRON_MONK
             stats.vitality >= 70 && stats.nutrition >= 70 -> HYDRATION_MAGE
             stats.recovery >= 70 && stats.focus >= 60 -> RECOVERY_MONK
-            stats.strength <= 30 && stats.vitality <= 40 -> DESK_GOBLIN
+            stats.strength <= 40 && stats.vitality <= 40 -> DESK_GOBLIN
             else -> BALANCED_HUMAN
         }
     }

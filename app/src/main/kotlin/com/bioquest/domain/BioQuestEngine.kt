@@ -34,7 +34,7 @@ class BioQuestEngine(
         val stepsToday = stepsByDate[today] ?: 0
 
         val corruption = calculateCorruption(logs, rules, today, goals, stepsByDate)
-        val stats = calculateStats(today, logs, corruption, goals, rules, stepsToday)
+        val stats = calculateStats(today, logs, corruption, goals, rules, stepsToday, stepsByDate)
         val quests = generateQuests(today, logs, corruption, goals, rules, stepsToday)
         val events = detectEvents(stats, corruption, now())
         val widgetState = buildWidgetState(stats, corruption, quests)
